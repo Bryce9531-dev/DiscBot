@@ -1,10 +1,17 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const { Client, Collection, Events, GatewayIntentBits } = require("discord.js");
+const { Client, Collection, GatewayIntentBits } = require("discord.js");
 require("dotenv").config();
 
 // Create a new client instance
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ 
+  intents: [ 
+    GatewayIntentBits.Guilds,
+   /*  GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMembers, */
+  ],
+});
 
 client.commands = new Collection();
 
@@ -30,103 +37,45 @@ for (const folder of commandFolders) {
   }
 };
 
-// When the client is ready, run this code (only once).
-// The distinction between `client: Client<boolean>` and `readyClient: Client<true>` is important for TypeScript developers.
-// It makes some properties non-nullable.
-client.once(Events.ClientReady, (readyClient) => {
-  console.log(`Ready! Logged in as ${readyClient.user.tag}`);
-});
+const eventsPath = path.join(__dirname, 'events');
+const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+
+for (const file of eventFiles) {
+	const filePath = path.join(eventsPath, file);
+	const event = require(filePath);
+	if (event.once) {
+		client.once(event.name, (...args) => event.execute(...args));
+	} else {
+		client.on(event.name, (...args) => event.execute(...args));
+	}
+};
 
 // Log in to Discord with your client's token
 client.login(process.env.TOKEN);
 
-client.on(Events.InteractionCreate, async interaction => {
-	if (!interaction.isChatInputCommand()) return;
 
-	const command = interaction.client.commands.get(interaction.commandName);
+/* //Funny Event Listeners
+client.on("messageCreate", (message) => {
+  if (message.author.bot) {
+    return;
+  }
 
-	if (!command) {
-		console.error(`No command matching ${interaction.commandName} was found.`);
-		return;
-	}
+  //typing the word trap
+  if (message.content.includes("trap", "trapped", "trapping", "traps")) {
+    message.reply({
+      files: [
+        {
+          attachment:
+            "https://filmschoolrejects.com/wp-content/uploads/2019/08/itsatrap-2.jpg",
+        },
+      ],
+    });
+  }
 
-	try {
-		await command.execute(interaction);
-	} catch (error) {
-		console.error(error);
-		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-		} else {
-			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-		}
-	}
-	console.log(interaction);
-});
-
-// require("dotenv").config();
-// const { request } = require('undici');
-
-// const {
-//   Client,
-//   IntentsBitField,
-//   GatewayIntentBits,
-//   Events,
-// } = require("discord.js");
-
-// let client = new Client({
-//   intents: [
-//     IntentsBitField.Flags.Guilds,
-//     IntentsBitField.Flags.GuildMembers,
-//     IntentsBitField.Flags.GuildMessages,
-//     IntentsBitField.Flags.MessageContent,
-//     IntentsBitField.Flags.GuildMessageReactions,
-//     GatewayIntentBits.Guilds,
-//   ],
-// });
-
-// client.on("ready", (c) => {
-//   console.log(`༼ つ ◕_◕ ༽つ ${c.user.username} is ready and online`);
-// });
-
-// client.on("interactionCreate", async (interaction) => {
-//   if (interaction.commandName === "hey") {
-//     interaction.reply("Hello friend");
-//   } else if (interaction.commandName === "weather") {
-//     const term = interaction.options.getString("term");
-//     const query = new URLSearchParams({ term });
-//     console.log(query);
-//     request(
-//       `http://api.weatherapi.com/v1/current.json?key=3f832c00dacc4f8c98f190014240603&q=${query}`
-//     ).then((dictResult) => {
-//       dictResult.body.json();
-//     }).then((result) => {
-//       console.log('result', result);
-//     }).catch(error => console.log('error', error ));
-//   } else{}
-// });
-
-// client.on("messageCreate", (message) => {
-//   if (message.author.bot) {
-//     return;
-//   }
-
-//   if (message.content.includes("trap", "trapped", "trapping", "traps")) {
-//     message.reply({
-//       files: [
-//         {
-//           attachment:
-//             "https://filmschoolrejects.com/wp-content/uploads/2019/08/itsatrap-2.jpg",
-//         },
-//       ],
-//     });
-//   }
-
-//   if (message.attachments.size && message.attachments.first().url) {
-//     message.channel.send(
-//       "@everyone It looks like someone is sending dick pics again!"
-//     );
-//   } else {
-//   }
-// });
-
-// client.login(process.env.TOKEN);
+  //Sending an Image
+  if (message.attachments.size && message.attachments.first().url) {
+    message.channel.send(
+       "@everyone It looks like someone is sending dick pics again!"
+     );
+   } else {}
+ }); */
