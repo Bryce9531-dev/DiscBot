@@ -22,7 +22,7 @@ module.exports = {
         redirect: 'follow'
       };
 
-      fetch(`http://api.weatherapi.com/v1/current.json?key=3f832c00dacc4f8c98f190014240603&q=${query}`, requestOptions)
+      fetch(`http://api.weatherapi.com/v1/current.json?key=${process.env.WEATHER_TOKEN}=${query}`, requestOptions)
         .then(response => response.json())
         .then(result => interaction.reply(`The current temperator in ${result.location.name} is ${result.current.temp_f}⁰F`))
         .catch(error => console.log('error', error));

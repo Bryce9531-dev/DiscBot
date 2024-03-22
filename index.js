@@ -7,9 +7,9 @@ require("dotenv").config();
 const client = new Client({ 
   intents: [ 
     GatewayIntentBits.Guilds,
-   /*  GatewayIntentBits.MessageContent,
+    GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.GuildMembers, */
+    GatewayIntentBits.GuildMembers,
   ],
 });
 
@@ -37,7 +37,7 @@ for (const folder of commandFolders) {
   }
 };
 
-const eventsPath = path.join(__dirname, 'events');
+const eventsPath = path.join(__dirname, 'events', 'utility');
 const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
 for (const file of eventFiles) {
@@ -50,32 +50,20 @@ for (const file of eventFiles) {
 	}
 };
 
+
+const eventsPath1 = path.join(__dirname, 'events', 'fun-events');
+const eventFiles1 = fs.readdirSync(eventsPath1).filter(file => file.endsWith('.js'));
+
+for (const file of eventFiles1) {
+	const filePath = path.join(eventsPath1, file);
+	const event = require(filePath);
+	if (event.once) {
+		client.once(event.name, (...args) => event.execute(...args));
+	} else {
+		client.on(event.name, (...args) => event.execute(...args));
+	}
+};
+
 // Log in to Discord with your client's token
 client.login(process.env.TOKEN);
 
-
-/* //Funny Event Listeners
-client.on("messageCreate", (message) => {
-  if (message.author.bot) {
-    return;
-  }
-
-  //typing the word trap
-  if (message.content.includes("trap", "trapped", "trapping", "traps")) {
-    message.reply({
-      files: [
-        {
-          attachment:
-            "https://filmschoolrejects.com/wp-content/uploads/2019/08/itsatrap-2.jpg",
-        },
-      ],
-    });
-  }
-
-  //Sending an Image
-  if (message.attachments.size && message.attachments.first().url) {
-    message.channel.send(
-       "@everyone It looks like someone is sending dick pics again!"
-     );
-   } else {}
- }); */

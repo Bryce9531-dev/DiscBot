@@ -10,7 +10,7 @@ module.exports = {
   async execute(interaction) {
 
     const myHeaders = new Headers();
-    myHeaders.append("X-Api-Key", "T3BPoEgdxBiR8ilhOAQdQw==P8rZ4T4mIyZpJy5Z");
+    myHeaders.append("X-Api-Key", process.env.FACT_TOKEN);
 
     const requestOptions = {
       method: "GET",
