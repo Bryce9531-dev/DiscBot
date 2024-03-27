@@ -4,8 +4,8 @@ const { Client, Collection, GatewayIntentBits } = require("discord.js");
 require("dotenv").config();
 
 // Create a new client instance
-const client = new Client({ 
-  intents: [ 
+const client = new Client({
+  intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMessages,
@@ -15,11 +15,11 @@ const client = new Client({
 
 client.commands = new Collection();
 
-const foldersPath = path.join(__dirname, "commands");
-const commandFolders = fs.readdirSync(foldersPath);
+const commandFoldersPath = path.join(__dirname, "commands");
+const commandFolders = fs.readdirSync(commandFoldersPath);
 
 for (const folder of commandFolders) {
-  const commandsPath = path.join(foldersPath, folder);
+  const commandsPath = path.join(commandFoldersPath, folder);
   const commandFiles = fs
     .readdirSync(commandsPath)
     .filter((file) => file.endsWith(".js"));
@@ -35,35 +35,26 @@ for (const folder of commandFolders) {
       );
     }
   }
-};
+}
 
-const eventsPath = path.join(__dirname, 'events', 'utility');
-const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+const eventsFoldersPath = path.join(__dirname, "events");
+const eventFolders = fs.readdirSync(eventsFoldersPath);
 
-for (const file of eventFiles) {
-	const filePath = path.join(eventsPath, file);
-	const event = require(filePath);
-	if (event.once) {
-		client.once(event.name, (...args) => event.execute(...args));
-	} else {
-		client.on(event.name, (...args) => event.execute(...args));
-	}
-};
-
-
-const eventsPath1 = path.join(__dirname, 'events', 'fun-events');
-const eventFiles1 = fs.readdirSync(eventsPath1).filter(file => file.endsWith('.js'));
-
-for (const file of eventFiles1) {
-	const filePath = path.join(eventsPath1, file);
-	const event = require(filePath);
-	if (event.once) {
-		client.once(event.name, (...args) => event.execute(...args));
-	} else {
-		client.on(event.name, (...args) => event.execute(...args));
-	}
-};
+for (const folder of eventFolders) {
+  const eventsPath = path.join(eventsFoldersPath, folder);
+  const eventFiles = fs
+    .readdirSync(eventsPath)
+    .filter((file) => file.endsWith(".js"));
+  for (const file of eventFiles) {
+    const filePath = path.join(eventsPath, file);
+    const event = require(filePath);
+    if (event.once) {
+      client.once(event.name, (...args) => event.execute(...args));
+    } else {
+      client.on(event.name, (...args) => event.execute(...args));
+    }
+  }
+}
 
 // Log in to Discord with your client's token
 client.login(process.env.TOKEN);
-
